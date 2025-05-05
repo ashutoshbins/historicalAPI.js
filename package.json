@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "stock-nse-india": "^2.0.0"  // use the latest version
+    "stock-nse-india": "^2.0.0"
   }
 }
