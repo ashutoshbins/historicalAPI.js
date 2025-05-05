@@ -1,30 +1,40 @@
-import express from 'express';
-import { getHistoricalData } from 'stock-nse-india'; // Assuming you want to use stock-nse-india module
+import express from "express";
+import { NseIndia } from "stock-nse-india";
+import cors from "cors";
 
 const app = express();
+const port = 3000;
+const nseIndia = new NseIndia();
 
-// Set up middleware for JSON requests
-app.use(express.json());
+app.use(cors()); // Enable CORS for frontend access
 
-// Example route: Root route
-app.get('/', (req, res) => {
-  res.send('Welcome to NSE Historical API!');
-});
+// GET /historical?symbol=TCS&from=01-05-2024
+app.get("/historical", async (req, res) => {
+  const symbol = req.query.symbol;
+  const startDate = req.query.from;
+  const endDate = "01-01-2025"; // ✅ Fixed
 
-// Example route to fetch historical data for a stock symbol
-app.get('/historical/:symbol', async (req, res) => {
-  const { symbol } = req.params;
-  
+  if (!symbol || !startDate) {
+    return res.status(400).json({ error: "Missing 'symbol' or 'from' query parameters." });
+  }
+
   try {
-    const historicalData = await getHistoricalData(symbol); // Replace with correct method from stock-nse-india
-    res.json(historicalData); // Respond with historical data
+    console.log(`⏳ Fetching historical data for ${symbol} from ${startDate} to ${endDate}...`);
+
+    const endpoint = `/api/historical/cm/equity?symbol=${symbol.toUpperCase()}&series=[%22EQ%22]&from=${startDate}&to=${endDate}`;
+    const response = await nseIndia.getDataByEndpoint(endpoint);
+
+    if (!response?.data || response.data.length === 0) {
+      return res.status(404).json({ error: "⚠️ No historical data found for this symbol and date range." });
+    }
+
+    return res.json({ data: response.data });
   } catch (error) {
-    console.error('Error fetching historical data:', error);
-    res.status(500).send('Error fetching historical data');
+    console.error("❌ Error:", error.message);
+    return res.status(500).json({ error: error.message });
   }
 });
 
-// Make the server listen on the appropriate port (3000 or any available port)
-app.listen(3000, () => {
-  console.log('Server is running on port 3000');
+app.listen(port, () => {
+  console.log(`🚀 API server running at http://localhost:${port}/historical`);
 });
