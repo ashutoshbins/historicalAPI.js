@@ -1,5 +1,5 @@
 // api/historical.js
-const { NseIndia } = require("stock-nse-india");
+import { NseIndia } from "stock-nse-india";
 
 const nseIndia = new NseIndia();
 
