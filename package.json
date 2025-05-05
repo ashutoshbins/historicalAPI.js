@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "stock-nse-india": "1.2.1"
+    "express": "^4.17.1",
+    "stock-nse-india": "1.2.1",
+    "cors": "^2.8.5"
   },
   "scripts": {
     "start": "node index.js"
