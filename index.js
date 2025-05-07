@@ -1,10 +1,9 @@
-const express = require("express");
-const { NseIndia } = require("stock-nse-india");
-const cors = require("cors");
+import express from "express";
+import cors from "cors";
+import { NseIndia } from "stock-nse-india";
 
 const app = express();
 const port = process.env.PORT || 3000;
-
 const nseIndia = new NseIndia();
 
 app.use(cors()); // Enable CORS for frontend access
@@ -13,7 +12,7 @@ app.use(cors()); // Enable CORS for frontend access
 app.get("/historical", async (req, res) => {
   const symbol = req.query.symbol;
   const startDate = req.query.from;
-  const endDate = "01-01-2025"; // ✅ Fixed
+  const endDate = "01-01-2025";
 
   if (!symbol || !startDate) {
     return res.status(400).json({ error: "Missing 'symbol' or 'from' query parameters." });
