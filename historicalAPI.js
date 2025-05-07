@@ -1,14 +1,14 @@
+const serverless = require('serverless-http');
 const express = require("express");
+const axios = require("axios");
 const { NseIndia } = require("stock-nse-india");
 const cors = require("cors");
 
 const app = express();
-const port = 3000;
 const nseIndia = new NseIndia();
 
 app.use(cors()); // Enable CORS for frontend access
 
-// GET /historical?symbol=TCS&from=01-05-2024
 app.get("/historical", async (req, res) => {
   const symbol = req.query.symbol;
   const startDate = req.query.from;
@@ -21,11 +21,12 @@ app.get("/historical", async (req, res) => {
   try {
     console.log(`⏳ Fetching historical data for ${symbol} from ${startDate} to ${endDate}...`);
 
-    const endpoint = `/api/historical/cm/equity?symbol=${symbol.toUpperCase()}&series=[%22EQ%22]&from=${startDate}&to=${endDate}`;
-    const response = await nseIndia.getDataByEndpoint(endpoint);
+    const apiUrl = `https://www.nseindia.com/api/historical/cm/equity?symbol=${symbol.toUpperCase()}&series=[%22EQ%22]&from=${startDate}&to=${endDate}`;
 
-    if (!response?.data || response.data.length === 0) {
-      return res.status(404).json({ error: "⚠️ No historical data found for this symbol and date range." });
+    const response = await axios.get(apiUrl);
+
+    if (!response || !response.data || response.data.length === 0) {
+      return res.status(404).json({ error: "⚠️ No historical data found." });
     }
 
     return res.json({ data: response.data });
@@ -35,6 +36,4 @@ app.get("/historical", async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`🚀 API server running at http://localhost:${port}/historical`);
-});
+module.exports.handler = serverless(app);
